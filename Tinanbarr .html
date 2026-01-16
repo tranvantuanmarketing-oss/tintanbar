@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titan Dashboard V3 - Fixed</title>
+    
+    <!-- 1. C?p nh?t các thu vi?n lõi (Core Libraries) -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. QUAN TR?NG: Thêm Prop-Types (B?t bu?c cho Recharts ch?y UMD) -->
+    <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
+
+    <!-- 3. Thu vi?n Recharts -->
+    <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 h-screen overflow-hidden">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Ki?m tra xem Recharts có t?i thành công không
+        if (!window.Recharts) {
+            document.getElementById('root').innerHTML = '<div style="color:white; padding: 20px;">L?i: Không t?i du?c thu vi?n Recharts. Vui lòng ki?m tra k?t n?i m?ng ho?c th? l?i.</div>';
+            throw new Error("Recharts not loaded");
+        }
+
+        const { 
+            BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+            LineChart, Line, PieChart, Pie, Cell, AreaChart, Area 
+        } = window.Recharts;
+
+        // --- ICONS (SVG Components) ---
+        const Icons = {
+            LayoutDashboard: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>,
+            TrendingUp: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>,
+            TrendingDown: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>,
+            Users: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            Wine: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg>,
+            CheckSquare: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
+            Plus: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
+            Calendar: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>,
+            Menu: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
+            ShoppingBag: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
+            Clock: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            UserPlus: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>,
+            X: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        };
+
+        // --- MOCK DATA ---
+        const INITIAL_STAFF = [
+            { id: 1, name: "Tu?n Tiger", role: "Sales", shift: "Ca 1 (18h-22h)", revenue: 45000000, bookings: 5, tasks: 90, kpi: 90, avatar: "T" },
+            { id: 2, name: "Lan VIP", role: "Sales", shift: "Ca 2 (22h-02h)", revenue: 82000000, bookings: 12, tasks: 100, kpi: 110, avatar: "L" },
+            { id: 3, name: "Hùng Bar", role: "Bartender", shift: "Ca 1 (18h-22h)", revenue: 12000000, bookings: 0, tasks: 100, kpi: 100, avatar: "H" },
+            { id: 4, name: "My Sales", role: "Sales", shift: "Ca 2 (22h-02h)", revenue: 28000000, bookings: 4, tasks: 70, kpi: 60, avatar: "M" },
+            { id: 5, name: "Ken Z", role: "DJ", shift: "Ca 3 (02h-Close)", revenue: 0, bookings: 0, tasks: 95, kpi: 95, avatar: "K" },
+            { id: 6, name: "Sarah", role: "Sales", shift: "Ca 3 (02h-Close)", revenue: 35000000, bookings: 6, tasks: 85, kpi: 80, avatar: "S" },
+        ];
+
+        const INITIAL_MENU = [
+            { id: 1, name: "Combo Hennesy VSOP", category: "Ru?u", price: 3500000, qty: 15, revenue: 52500000, trend: "up" },
+            { id: 2, name: "Trái cây th?p c?m", category: "Ð? an", price: 350000, qty: 40, revenue: 14000000, trend: "stable" },
+            { id: 3, name: "Cocktail Signature A", category: "Ð? u?ng", price: 250000, qty: 8, revenue: 2000000, trend: "down" },
+            { id: 4, name: "Bóng cu?i (Combo)", category: "D?ch v?", price: 500000, qty: 50, revenue: 25000000, trend: "up" },
+            { id: 5, name: "Khoai tây chiên", category: "Ð? an", price: 90000, qty: 5, revenue: 450000, trend: "down" },
+            { id: 6, name: "Macallan 12", category: "Ru?u", price: 4200000, qty: 10, revenue: 42000000, trend: "up" },
+        ];
+
+        const TABLES_MOCK = Array.from({ length: 20 }, (_, i) => ({
+            id: i + 1,
+            name: `Bàn ${i + 1}`,
+            status: 'empty',
+            total: 0,
+            staff: "",
+            customerName: "",
+            customerPhone: ""
+        }));
+
+        const INITIAL_TASKS = [
+            { id: 1, title: "G?i l?i khách VIP bàn 3", assignee: "Tu?n Tiger", assigner: "Lê Minh (Boss)", status: "todo", priority: "high", deadline: "22:00" },
+            { id: 2, title: "Ki?m kê kho ru?u m?nh", assignee: "Hùng Bar", assigner: "Ph?m Hùng (QL)", status: "doing", priority: "medium", deadline: "20:00" },
+            { id: 3, title: "Setup bàn ti?c sinh nh?t", assignee: "My Sales", assigner: "Ph?m Hùng (QL)", status: "done", priority: "high", deadline: "19:00" },
+        ];
+
+        const INITIAL_EXPENSES = [
+            { id: 1, type: "Nh?p hàng", desc: "Nh?p ru?u kho t?ng", amount: 25000000, status: "pending", date: "2023-10-25" },
+            { id: 2, type: "Marketing", desc: "Ch?y Ads Facebook", amount: 5000000, status: "approved", date: "2023-10-25" },
+        ];
+
+        // --- UTILS ---
+        const formatCurrency = (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        const COLORS = ['#10b981', '#f59e0b', '#f43f5e', '#6366f1', '#8b5cf6'];
+
+        const generateRandomData = (seed) => ({
+            revenue: 100000000 + Math.random() * 50000000 * seed,
+            expense: 40000000 + Math.random() * 20000000 * seed,
+            bookings: Math.floor(10 + Math.random() * 10 * seed),
+            chartData: Array.from({ length: 7 }, (_, i) => ({
+                name: `Ngày ${i + 1}`,
+                value: Math.floor(Math.random() * 100) + 20
+            }))
+        });
+
+        // --- COMPONENTS ---
+
+        const DateFilter = ({ onChange, value }) => (
+            <div className="bg-slate-800 p-2 rounded-lg flex flex-wrap items-center gap-2 border border-slate-700 shadow-sm mb-4">
+                <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded border border-slate-700">
+                    <Icons.Calendar className="w-4 h-4 text-indigo-400" />
+                    <select 
+                        value={value.year} 
+                        onChange={(e) => onChange({...value, year: Number(e.target.value)})}
+                        className="bg-transparent text-sm text-white focus:outline-none cursor-pointer"
+                    >
+                        <option value={2023}>2023</option>
+                        <option value={2024}>2024</option>
+                    </select>
+                </div>
+                <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded border border-slate-700">
+                    <span className="text-xs text-slate-400">Tháng</span>
+                    <select 
+                        value={value.month} 
+                        onChange={(e) => onChange({...value, month: Number(e.target.value)})}
+                        className="bg-transparent text-sm text-white focus:outline-none cursor-pointer"
+                    >
+                        {Array.from({length: 12}, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                </div>
+                <div className="flex bg-slate-900 rounded border border-slate-700 p-1">
+                    {['today', 'week', 'month'].map(p => (
+                        <button
+                            key={p}
+                            onClick={() => onChange({...value, period: p})}
+                            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${value.period === p ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            {p === 'today' ? 'Hôm nay' : p === 'week' ? 'Tu?n này' : 'Tháng này'}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const StatCard = ({ title, value, subtext, type = "neutral", onClick, chartData, chartColor }) => {
+            const getColors = () => {
+                switch (type) {
+                    case "success": return "bg-emerald-900/20 border-emerald-500/30 text-emerald-400";
+                    case "danger": return "bg-rose-900/20 border-rose-500/30 text-rose-400";
+                    default: return "bg-slate-800 border-slate-700 text-slate-100";
+                }
+            };
+            
+            const gradientId = "color" + title.replace(/\s+/g, '');
+
+            return (
+                <div onClick={onClick} className={`p-5 rounded-2xl border ${getColors()} flex flex-col justify-between shadow-xl cursor-pointer hover:scale-[1.01] transition-all h-60`}>
+                    <div>
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className="text-xs lg:text-sm uppercase tracking-wider font-bold opacity-80">{title}</h3>
+                            {type === 'success' ? <Icons.TrendingUp size={18} /> : type === 'danger' ? <Icons.TrendingDown size={18} /> : <div />}
+                        </div>
+                        <div className="text-2xl lg:text-3xl font-black mt-1 tracking-tight truncate text-ellipsis overflow-hidden whitespace-nowrap" title={value}>
+                            {value}
+                        </div>
+                        {subtext && <div className="text-xs mt-1 opacity-70 font-medium">{subtext}</div>}
+                    </div>
+                    <div className="h-24 w-full mt-2 -mx-2">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartData}>
+                                <defs>
+                                    <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor={chartColor} stopOpacity={0.4}/>
+                                        <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <Area type="monotone" dataKey="value" stroke={chartColor} strokeWidth={2} fillOpacity={1} fill={`url(#${gradientId})`} />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            );
+        };
+
+        const TaskModal = ({ isOpen, onClose, staffList, onSave }) => {
+            const [title, setTitle] = useState("");
+            const [assignee, setAssignee] = useState("");
+            const [deadline, setDeadline] = useState("");
+            const [priority, setPriority] = useState("medium");
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-600 w-full max-w-md shadow-2xl">
+                        <h3 className="text-xl font-bold text-white mb-4 flex justify-between items-center">
+                            Giao Nhi?m V? M?i
+                            <button onClick={onClose}><Icons.X size={20} className="text-slate-400" /></button>
+                        </h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs text-slate-400 mb-1 block">Tên công vi?c</label>
+                                <input className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" placeholder="Ví d?: G?i l?i khách bàn 5" value={title} onChange={e => setTitle(e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="text-xs text-slate-400 mb-1 block">Ngu?i th?c hi?n</label>
+                                <select className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" value={assignee} onChange={e => setAssignee(e.target.value)}>
+                                    <option value="">-- Ch?n nhân s? --</option>
+                                    {staffList.map((s) => <option key={s.id} value={s.name}>{s.name} ({s.role})</option>)}
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs text-slate-400 mb-1 block">Deadline</label>
+                                    <input type="time" className="bg-slate-900 border border-slate-700 rounded p-3 text-white" value={deadline} onChange={e => setDeadline(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-slate-400 mb-1 block">Uu tiên</label>
+                                    <select className="bg-slate-900 border border-slate-700 rounded p-3 text-white w-full" value={priority} onChange={e => setPriority(e.target.value)}>
+                                        <option value="high">Cao</option>
+                                        <option value="medium">Bình thu?ng</option>
+                                        <option value="low">Th?p</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => { 
+                                    if(!title || !assignee) return alert("Vui lòng nh?p d? thông tin");
+                                    onSave({title, assignee, deadline, priority}); 
+                                    onClose(); 
+                                    setTitle(""); 
+                                    setDeadline("");
+                                }} 
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg mt-4 shadow-lg shadow-indigo-900/50"
+                            >
+                                Giao Vi?c Ngay
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        // --- ADD EXPENSE MODAL ---
+        const AddExpenseModal = ({ isOpen, onClose, onSave }) => {
+            const [desc, setDesc] = useState("");
+            const [amount, setAmount] = useState("");
+            const [type, setType] = useState("Nh?p hàng");
+
+            if(!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-600 w-full max-w-md shadow-2xl">
+                        <h3 className="text-xl font-bold text-white mb-4 flex justify-between items-center">
+                            T?o Phi?u Chi M?i
+                            <button onClick={onClose}><Icons.X size={20} className="text-slate-400" /></button>
+                        </h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs text-slate-400 mb-1 block">N?i dung chi</label>
+                                <input className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" placeholder="Ví d?: Nh?p ru?u Chivas" value={desc} onChange={e => setDesc(e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="text-xs text-slate-400 mb-1 block">S? ti?n (VNÐ)</label>
+                                <input className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" type="number" placeholder="0" value={amount} onChange={e => setAmount(e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="text-xs text-slate-400 mb-1 block">Lo?i chi phí</label>
+                                <select className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" value={type} onChange={e => setType(e.target.value)}>
+                                    <option value="Nh?p hàng">Nh?p hàng / Kho</option>
+                                    <option value="Marketing">Marketing / QC</option>
+                                    <option value="V?n hành">V?n hành / Ði?n nu?c</option>
+                                    <option value="Nhân s?">Luong / Thu?ng</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+                            <button 
+                                onClick={() => { 
+                                    if(!desc || !amount) return alert("Vui lòng nh?p d? thông tin");
+                                    onSave({desc, amount: Number(amount), type}); 
+                                    onClose(); 
+                                    setDesc(""); 
+                                    setAmount(""); 
+                                }}
+                                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-lg mt-2 shadow-lg shadow-rose-900/50"
+                            >
+                                Luu Phi?u Chi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const POSModal = ({ isOpen, onClose, menuItems, onSave, tablesAvailable }) => {
+            const [cart, setCart] = useState([]);
+            const [selectedTableId, setSelectedTableId] = useState("");
+            const [customerName, setCustomerName] = useState("");
+            const [customerPhone, setCustomerPhone] = useState("");
+
+            useEffect(() => {
+                if(isOpen) { setCart([]); setSelectedTableId(""); setCustomerName(""); setCustomerPhone(""); }
+            }, [isOpen]);
+
+            if (!isOpen) return null;
+
+            const addToCart = (item) => {
+                const existing = cart.find(i => i.id === item.id);
+                if (existing) setCart(cart.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i));
+                else setCart([...cart, { ...item, qty: 1 }]);
+            };
+
+            const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
+                    <div className="bg-slate-900 w-full max-w-5xl h-[85vh] rounded-2xl border border-slate-700 flex overflow-hidden shadow-2xl">
+                        <div className="w-2/3 flex flex-col border-r border-slate-800">
+                            <div className="p-4 bg-slate-950 border-b border-slate-800 grid grid-cols-3 gap-3">
+                                <select 
+                                    className="bg-slate-800 border border-slate-600 rounded p-2 text-white font-bold"
+                                    value={selectedTableId}
+                                    onChange={(e) => setSelectedTableId(e.target.value)}
+                                >
+                                    <option value="">-- Ch?n Bàn --</option>
+                                    {tablesAvailable.filter((t) => t.status === 'empty').map((t) => (
+                                        <option key={t.id} value={t.id}>{t.name} (Tr?ng)</option>
+                                    ))}
+                                    {tablesAvailable.filter((t) => t.status === 'occupied').map((t) => (
+                                        <option key={t.id} value={t.id} disabled>{t.name} (Có khách)</option>
+                                    ))}
+                                </select>
+                                <input type="text" placeholder="Tên khách" className="bg-slate-800 border border-slate-600 rounded p-2 text-white" value={customerName} onChange={e => setCustomerName(e.target.value)} />
+                                <input type="text" placeholder="SÐT" className="bg-slate-800 border border-slate-600 rounded p-2 text-white" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4 bg-slate-900">
+                                <div className="grid grid-cols-3 gap-3">
+                                    {menuItems.map((item) => (
+                                        <div key={item.id} onClick={() => addToCart(item)} className="bg-slate-800 p-3 rounded-lg border border-slate-700 hover:border-indigo-500 cursor-pointer h-24 flex flex-col justify-between">
+                                            <div><div className="font-bold text-slate-200 text-sm truncate">{item.name}</div><div className="text-xs text-slate-400">{item.category}</div></div>
+                                            <div className="text-emerald-400 font-bold text-right">{formatCurrency(item.price)}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="w-1/3 flex flex-col bg-slate-950">
+                            <div className="p-4 border-b border-slate-800 flex justify-between"><h3 className="font-bold text-white">Gi? hàng</h3><span className="text-slate-400 text-sm">{cart.length} món</span></div>
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                {cart.map((item, idx) => (
+                                    <div key={idx} className="flex justify-between text-sm border-b border-slate-800 pb-2">
+                                        <div><div className="text-slate-200">{item.name}</div><div className="text-xs text-slate-500">{formatCurrency(item.price)} x {item.qty}</div></div>
+                                        <div className="font-bold text-slate-200">{formatCurrency(item.price * item.qty)}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="p-6 bg-slate-900 border-t border-slate-800">
+                                <div className="flex justify-between text-xl font-black text-white mb-6"><span>T?NG</span><span className="text-emerald-400">{formatCurrency(total)}</span></div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button onClick={onClose} className="bg-slate-700 text-white py-3 rounded-lg font-bold">H?y</button>
+                                    <button onClick={() => { 
+                                        if(!selectedTableId) return alert("Chua ch?n bàn!");
+                                        onSave({ tableId: Number(selectedTableId), total, customerName, customerPhone }); 
+                                        onClose(); 
+                                    }} className="bg-indigo-600 text-white py-3 rounded-lg font-bold shadow-lg">LÊN ÐON</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        function TitanApp() {
+            const [currentView, setCurrentView] = useState("dashboard");
+            const [role, setRole] = useState("owner"); 
+            const [isSidebarOpen, setSidebarOpen] = useState(true);
+            
+            // Data State
+            const [dateFilter, setDateFilter] = useState({ year: 2023, month: 10, period: 'today' });
+            const [simulatedData, setSimulatedData] = useState(generateRandomData(1));
+            const [staffData, setStaffData] = useState(INITIAL_STAFF);
+            const [taskData, setTaskData] = useState(INITIAL_TASKS);
+            const [tables, setTables] = useState(TABLES_MOCK);
+            const [expenseData, setExpenseData] = useState(INITIAL_EXPENSES);
+
+            // Modal State
+            const [isPOSOpen, setIsPOSOpen] = useState(false);
+            const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+            const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+
+            useEffect(() => {
+                const seed = dateFilter.month + dateFilter.year + (dateFilter.period === 'today' ? 1 : 2);
+                setSimulatedData(generateRandomData(seed));
+                setStaffData(staffData.map(s => ({ ...s, revenue: s.revenue * (0.8 + Math.random() * 0.4) })));
+            }, [dateFilter]);
+
+            const handleCreateOrder = (orderInfo) => {
+                setTables(tables.map(t => t.id === orderInfo.tableId ? { 
+                    ...t, status: 'occupied', total: t.total + orderInfo.total, 
+                    customerName: orderInfo.customerName, customerPhone: orderInfo.customerPhone 
+                } : t));
+            };
+
+            const handleAddTask = (newTask) => {
+                setTaskData([{ id: Date.now(), ...newTask, assigner: role === 'owner' ? 'Boss' : 'Manager', status: 'todo' }, ...taskData]);
+            };
+
+            const handleAddExpense = (newExpense) => {
+                const expense = {
+                    id: Date.now(),
+                    ...newExpense,
+                    status: role === 'owner' ? 'approved' : 'pending',
+                    date: new Date().toISOString().split('T')[0]
+                };
+                setExpenseData([expense, ...expenseData]);
+            };
+
+            const handleTaskAction = (taskId, action) => {
+                setTaskData(taskData.map(t => t.id === taskId ? { ...t, status: action === 'accept' ? 'doing' : 'done' } : t));
+            };
+
+            const navItems = [
+                { id: "dashboard", label: "T?ng Quan", icon: Icons.LayoutDashboard, roles: ["owner", "manager"] },
+                { id: "cashin", label: "Ti?n Vào (POS)", icon: Icons.TrendingUp, roles: ["owner", "manager", "staff"] },
+                { id: "cashout", label: "Ti?n Ra", icon: Icons.TrendingDown, roles: ["owner", "manager"] },
+                { id: "staff", label: "Nhân s?", icon: Icons.Users, roles: ["owner", "manager"] },
+                { id: "tasks", label: "Nhi?m v?", icon: Icons.CheckSquare, roles: ["owner", "manager", "staff"] },
+            ];
+
+            const renderDashboard = () => (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-2xl font-black text-white uppercase">T?ng Quan</h2>
+                        <DateFilter value={dateFilter} onChange={setDateFilter} />
+                    </div>
+                    
+                    {/* 3 C?t Trên */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <StatCard 
+                            title="Doanh Thu" 
+                            value={formatCurrency(simulatedData.revenue)} 
+                            type="success" 
+                            chartColor="#10b981"
+                            chartData={simulatedData.chartData}
+                            onClick={() => setCurrentView('cashin')}
+                        />
+                        <StatCard 
+                            title="Chi Phí" 
+                            value={formatCurrency(simulatedData.expense)} 
+                            type="danger" 
+                            chartColor="#f43f5e"
+                            chartData={simulatedData.chartData.map((d) => ({...d, value: d.value * 0.6}))}
+                            onClick={() => setCurrentView('cashout')}
+                        />
+                        <StatCard 
+                            title="L?i Nhu?n Ròng" 
+                            value={formatCurrency(simulatedData.revenue - simulatedData.expense)} 
+                            type="success" 
+                            chartColor="#f59e0b"
+                            chartData={simulatedData.chartData.map((d) => ({...d, value: d.value * 0.4}))}
+                        />
+                    </div>
+
+                    {/* 2 C?t Du?i */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <StatCard 
+                            title="Booking Hi?u Qu?" 
+                            value={`${simulatedData.bookings} Bàn`} 
+                            subtext="L?p d?y: 65%"
+                            type="neutral" 
+                            chartColor="#6366f1"
+                            chartData={simulatedData.chartData}
+                            onClick={() => setCurrentView('cashin')}
+                        />
+                        <StatCard 
+                            title="Hi?u Su?t Nhân S?" 
+                            value="94%" 
+                            subtext="Top Star: Lan VIP"
+                            type="neutral" 
+                            chartColor="#8b5cf6"
+                            chartData={simulatedData.chartData}
+                            onClick={() => setCurrentView('staff')}
+                        />
+                    </div>
+                </div>
+            );
+
+            const renderCashOut = () => (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                      <DateFilter value={dateFilter} onChange={setDateFilter} />
+                      <button 
+                        onClick={() => setIsExpenseModalOpen(true)}
+                        className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2 rounded-lg flex items-center font-bold shadow-lg shadow-rose-900/50"
+                      >
+                        <Icons.Plus className="mr-2" size={18} /> T?o Phi?u Chi
+                      </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      {/* Chart Breakdown */}
+                      <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                        <h3 className="text-lg font-bold text-white mb-4">Co C?u Chi Phí</h3>
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                  <Pie data={[
+                                    { name: 'Nh?p hàng', value: 50 }, { name: 'Nhân s?', value: 30 }, { name: 'Mkt', value: 15 }, { name: 'Khác', value: 5 }
+                                  ]} dataKey="value" cx="50%" cy="50%" innerRadius={60} outerRadius={80}>
+                                    {COLORS.map((color, index) => <Cell key={`cell-${index}`} fill={color} />)}
+                                  </Pie>
+                                  <Tooltip />
+                              </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm mt-4">
+                            <div className="flex items-center"><div className="w-3 h-3 bg-emerald-500 rounded-full mr-2"></div> Nh?p hàng (50%)</div>
+                            <div className="flex items-center"><div className="w-3 h-3 bg-amber-500 rounded-full mr-2"></div> Nhân s? (30%)</div>
+                            <div className="flex items-center"><div className="w-3 h-3 bg-rose-500 rounded-full mr-2"></div> Marketing (15%)</div>
+                        </div>
+                      </div>
+
+                      {/* Expense List */}
+                      <div className="lg:col-span-2 bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                        <div className="p-4 border-b border-slate-700 bg-slate-950/50 flex justify-between items-center">
+                            <h3 className="font-bold text-white">Danh Sách Phi?u Chi</h3>
+                            <span className="text-slate-400 text-sm">T?ng: <span className="text-rose-400 font-bold">{formatCurrency(expenseData.reduce((a,b) => a + b.amount, 0))}</span></span>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-slate-300">
+                              <thead className="bg-slate-900 text-slate-400 uppercase text-xs">
+                                  <tr>
+                                    <th className="px-6 py-4">Th?i gian</th>
+                                    <th className="px-6 py-4">H?ng m?c</th>
+                                    <th className="px-6 py-4">N?i dung</th>
+                                    <th className="px-6 py-4 text-right">S? ti?n</th>
+                                    <th className="px-6 py-4 text-center">Tr?ng thái</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  {expenseData.map((exp) => (
+                                    <tr key={exp.id} className="border-b border-slate-700 hover:bg-slate-700/30">
+                                        <td className="px-6 py-4">{exp.date}</td>
+                                        <td className="px-6 py-4"><span className="px-2 py-1 bg-slate-700 rounded text-xs border border-slate-600">{exp.type}</span></td>
+                                        <td className="px-6 py-4 font-bold text-white">{exp.desc}</td>
+                                        <td className="px-6 py-4 text-right font-bold text-rose-400">{formatCurrency(exp.amount)}</td>
+                                        <td className="px-6 py-4 text-center">
+                                          <span className={`px-2 py-1 rounded text-xs font-bold ${exp.status === 'approved' ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-900' : 'bg-amber-900/30 text-amber-400 border border-amber-900'}`}>
+                                              {exp.status === 'approved' ? 'Ðã duy?t' : 'Ch? duy?t'}
+                                          </span>
+                                        </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+            );
+
+            const renderTasks = () => (
+                <div className="h-full flex flex-col animate-fade-in">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-black text-white uppercase">Nhi?m V? & KPI</h2>
+                        {(role === 'owner' || role === 'manager') && (
+                            <button 
+                                onClick={() => setIsTaskModalOpen(true)}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center font-bold shadow-lg"
+                            >
+                                <Icons.Plus size={18} className="mr-2" /> Giao Vi?c M?i
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 overflow-hidden">
+                        {['todo', 'doing', 'done'].map(status => (
+                            <div key={status} className="bg-slate-800/50 rounded-xl border border-slate-700 flex flex-col h-full">
+                                <div className={`p-4 border-b border-slate-700 font-bold uppercase tracking-wider flex justify-between ${status === 'todo' ? 'text-slate-300' : status === 'doing' ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                    <span>{status === 'todo' ? 'M?i Giao' : status === 'doing' ? 'Ðang Làm' : 'Hoàn Thành'}</span>
+                                    <span className="bg-slate-900 px-2 rounded text-xs py-0.5">{taskData.filter(t => t.status === status).length}</span>
+                                </div>
+                                <div className="p-3 space-y-3 overflow-y-auto flex-1">
+                                    {taskData.filter(t => t.status === status).map(task => (
+                                        <div key={task.id} className="bg-slate-800 p-4 rounded-lg border border-slate-600 shadow relative">
+                                            <div className="flex justify-between mb-2">
+                                                <span className={`text-[10px] px-2 py-0.5 rounded border uppercase font-bold ${task.priority === 'high' ? 'border-rose-500 text-rose-400' : 'border-blue-500 text-blue-400'}`}>{task.priority}</span>
+                                                <div className="text-xs text-slate-500">DL: {task.deadline}</div>
+                                            </div>
+                                            <h4 className="font-bold text-white mb-1">{task.title}</h4>
+                                            <div className="text-xs text-slate-400 mb-3">Giao: {task.assigner} ? <span className="text-white font-bold">{task.assignee}</span></div>
+                                            <div className="grid grid-cols-1 gap-2">
+                                                {status === 'todo' && (role === 'staff' || role === 'manager') && (
+                                                    <button onClick={() => handleTaskAction(task.id, 'accept')} className="bg-slate-700 hover:bg-indigo-600 text-white text-xs py-2 rounded font-bold">NH?N VI?C</button>
+                                                )}
+                                                {status === 'doing' && (role === 'staff' || role === 'manager') && (
+                                                    <button onClick={() => handleTaskAction(task.id, 'complete')} className="bg-emerald-700 hover:bg-emerald-600 text-white text-xs py-2 rounded font-bold">HOÀN THÀNH</button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {taskData.filter(t => t.status === status).length === 0 && <div className="text-center text-slate-600 italic py-10">Tr?ng</div>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="flex h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden">
+                    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} hidden md:flex flex-col bg-slate-950 border-r border-slate-800 transition-all duration-300 z-20`}>
+                        <div className="p-4 flex items-center justify-center h-20 border-b border-slate-800">
+                            {isSidebarOpen ? <h1 className="text-2xl font-black text-indigo-500 uppercase">TITAN <span className="text-white text-sm block">APP</span></h1> : <span className="font-black text-indigo-500 text-2xl">T</span>}
+                        </div>
+                        <nav className="flex-1 py-6 px-4 space-y-2">
+                            {navItems.filter(item => item.roles.includes(role)).map((item) => (
+                                <button key={item.id} onClick={() => setCurrentView(item.id)} className={`w-full flex items-center p-3 rounded-xl font-bold transition-all ${currentView === item.id ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                                    <item.icon className={`w-5 h-5 ${isSidebarOpen ? 'mr-3' : 'mx-auto'}`} /> {isSidebarOpen && <span>{item.label}</span>}
+                                </button>
+                            ))}
+                        </nav>
+                        <div className="p-4 border-t border-slate-800">
+                            <div className={`flex flex-col gap-2 ${!isSidebarOpen && 'items-center'}`}>
+                                <button onClick={() => setRole('owner')} className={`text-xs px-3 py-2 rounded font-bold border ${role === 'owner' ? 'bg-amber-500 text-black' : 'border-slate-700 text-slate-400'}`}>BOSS</button>
+                                <button onClick={() => setRole('manager')} className={`text-xs px-3 py-2 rounded font-bold border ${role === 'manager' ? 'bg-blue-500 text-white' : 'border-slate-700 text-slate-400'}`}>MANAGER</button>
+                                <button onClick={() => setRole('staff')} className={`text-xs px-3 py-2 rounded font-bold border ${role === 'staff' ? 'bg-emerald-500 text-white' : 'border-slate-700 text-slate-400'}`}>STAFF</button>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-900 relative">
+                        <header className="h-16 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-6">
+                            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="md:hidden text-slate-300"><Icons.Menu /></button>
+                            <div className="flex-1"></div>
+                            <div className="flex items-center space-x-4">
+                                <div className="text-right hidden sm:block"><div className="text-sm font-bold text-white">{role === 'owner' ? 'Lê Minh' : role === 'manager' ? 'Ph?m Hùng' : 'Tu?n Tiger'}</div><div className="text-xs text-indigo-400 font-bold uppercase">{role}</div></div>
+                                <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold border-2 border-slate-700">{role === 'owner' ? 'LM' : role === 'manager' ? 'PH' : 'TT'}</div>
+                            </div>
+                        </header>
+
+                        <main className="flex-1 overflow-y-auto p-6 pb-24">
+                            {currentView === 'dashboard' && renderDashboard()}
+                            {currentView === 'cashin' && (
+                                <div className="space-y-6 animate-fade-in">
+                                    <div className="flex justify-between items-center"><DateFilter value={dateFilter} onChange={setDateFilter} /><button onClick={() => setIsPOSOpen(true)} className="bg-emerald-600 text-white px-4 py-2 rounded font-bold flex items-center"><Icons.Plus className="mr-2" /> T?o Ðon</button></div>
+                                    <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
+                                        {tables.map(t => (
+                                            <div key={t.id} onClick={() => t.status === 'empty' && setIsPOSOpen(true)} className={`aspect-square rounded-xl flex flex-col items-center justify-center border-2 cursor-pointer ${t.status === 'occupied' ? 'bg-rose-900/40 border-rose-500' : 'bg-emerald-900/20 border-emerald-500/30'}`}>
+                                                <span className="font-bold text-lg">{t.id}</span>
+                                                <div className="text-[10px] mt-1 text-center">{t.status === 'occupied' ? <><div className="truncate px-1">{t.customerName}</div><div>{formatCurrency(t.total)}</div></> : <span className="opacity-50">Tr?ng</span>}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {currentView === 'cashout' && renderCashOut()}
+                            {currentView === 'staff' && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+                                    {staffData.map(s => <div key={s.id} className="bg-slate-800 p-4 rounded-lg flex justify-between items-center border border-slate-700"><div><div className="font-bold text-white">{s.name}</div><div className="text-xs text-slate-400">{s.role} - {s.shift}</div></div><div className="text-emerald-400 font-bold">{formatCurrency(s.revenue)}</div></div>)}
+                                </div>
+                            )}
+                            {currentView === 'tasks' && renderTasks()}
+                        </main>
+
+                        <POSModal isOpen={isPOSOpen} onClose={() => setIsPOSOpen(false)} menuItems={INITIAL_MENU} onSave={handleCreateOrder} tablesAvailable={tables} />
+                        <TaskModal isOpen={isTaskModalOpen} onClose={() => setIsTaskModalOpen(false)} staffList={staffData} onSave={handleAddTask} />
+                        <AddExpenseModal isOpen={isExpenseModalOpen} onClose={() => setIsExpenseModalOpen(false)} onSave={handleAddExpense} />
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<TitanApp />);
+    </script>
+</body>
+</html>
