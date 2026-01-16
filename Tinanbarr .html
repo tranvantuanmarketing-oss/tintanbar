@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titan Dashboard V3 - Fixed</title>
     
-    <!-- 1. C?p nh?t c�c thu vi?n l�i (Core Libraries) -->
+    <!-- 1. Cập nhật các thư viện lõi (Core Libraries) -->
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 2. QUAN TR?NG: Th�m Prop-Types (B?t bu?c cho Recharts ch?y UMD) -->
+    <!-- 2. QUAN TRỌNG: Thêm Prop-Types (Bắt buộc cho Recharts chạy UMD) -->
     <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
 
-    <!-- 3. Thu vi?n Recharts -->
+    <!-- 3. Thư viện Recharts -->
     <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
 
     <style>
@@ -33,9 +33,9 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
         
-        // Ki?m tra xem Recharts c� t?i th�nh c�ng kh�ng
+        // Kiểm tra xem Recharts có tải thành công không
         if (!window.Recharts) {
-            document.getElementById('root').innerHTML = '<div style="color:white; padding: 20px;">L?i: Kh�ng t?i du?c thu vi?n Recharts. Vui l�ng ki?m tra k?t n?i m?ng ho?c th? l?i.</div>';
+            document.getElementById('root').innerHTML = '<div style="color:white; padding: 20px;">Lỗi: Không tải được thư viện Recharts. Vui lòng kiểm tra kết nối mạng hoặc thử lại.</div>';
             throw new Error("Recharts not loaded");
         }
 
@@ -63,26 +63,26 @@
 
         // --- MOCK DATA ---
         const INITIAL_STAFF = [
-            { id: 1, name: "Tu?n Tiger", role: "Sales", shift: "Ca 1 (18h-22h)", revenue: 45000000, bookings: 5, tasks: 90, kpi: 90, avatar: "T" },
+            { id: 1, name: "Tuấn Tiger", role: "Sales", shift: "Ca 1 (18h-22h)", revenue: 45000000, bookings: 5, tasks: 90, kpi: 90, avatar: "T" },
             { id: 2, name: "Lan VIP", role: "Sales", shift: "Ca 2 (22h-02h)", revenue: 82000000, bookings: 12, tasks: 100, kpi: 110, avatar: "L" },
-            { id: 3, name: "H�ng Bar", role: "Bartender", shift: "Ca 1 (18h-22h)", revenue: 12000000, bookings: 0, tasks: 100, kpi: 100, avatar: "H" },
+            { id: 3, name: "Hùng Bar", role: "Bartender", shift: "Ca 1 (18h-22h)", revenue: 12000000, bookings: 0, tasks: 100, kpi: 100, avatar: "H" },
             { id: 4, name: "My Sales", role: "Sales", shift: "Ca 2 (22h-02h)", revenue: 28000000, bookings: 4, tasks: 70, kpi: 60, avatar: "M" },
             { id: 5, name: "Ken Z", role: "DJ", shift: "Ca 3 (02h-Close)", revenue: 0, bookings: 0, tasks: 95, kpi: 95, avatar: "K" },
             { id: 6, name: "Sarah", role: "Sales", shift: "Ca 3 (02h-Close)", revenue: 35000000, bookings: 6, tasks: 85, kpi: 80, avatar: "S" },
         ];
 
         const INITIAL_MENU = [
-            { id: 1, name: "Combo Hennesy VSOP", category: "Ru?u", price: 3500000, qty: 15, revenue: 52500000, trend: "up" },
-            { id: 2, name: "Tr�i c�y th?p c?m", category: "�? an", price: 350000, qty: 40, revenue: 14000000, trend: "stable" },
-            { id: 3, name: "Cocktail Signature A", category: "�? u?ng", price: 250000, qty: 8, revenue: 2000000, trend: "down" },
-            { id: 4, name: "B�ng cu?i (Combo)", category: "D?ch v?", price: 500000, qty: 50, revenue: 25000000, trend: "up" },
-            { id: 5, name: "Khoai t�y chi�n", category: "�? an", price: 90000, qty: 5, revenue: 450000, trend: "down" },
-            { id: 6, name: "Macallan 12", category: "Ru?u", price: 4200000, qty: 10, revenue: 42000000, trend: "up" },
+            { id: 1, name: "Combo Hennesy VSOP", category: "Rượu", price: 3500000, qty: 15, revenue: 52500000, trend: "up" },
+            { id: 2, name: "Trái cây thập cẩm", category: "Đồ ăn", price: 350000, qty: 40, revenue: 14000000, trend: "stable" },
+            { id: 3, name: "Cocktail Signature A", category: "Đồ uống", price: 250000, qty: 8, revenue: 2000000, trend: "down" },
+            { id: 4, name: "Bóng cười (Combo)", category: "Dịch vụ", price: 500000, qty: 50, revenue: 25000000, trend: "up" },
+            { id: 5, name: "Khoai tây chiên", category: "Đồ ăn", price: 90000, qty: 5, revenue: 450000, trend: "down" },
+            { id: 6, name: "Macallan 12", category: "Rượu", price: 4200000, qty: 10, revenue: 42000000, trend: "up" },
         ];
 
         const TABLES_MOCK = Array.from({ length: 20 }, (_, i) => ({
             id: i + 1,
-            name: `B�n ${i + 1}`,
+            name: `Bàn ${i + 1}`,
             status: 'empty',
             total: 0,
             staff: "",
@@ -91,14 +91,14 @@
         }));
 
         const INITIAL_TASKS = [
-            { id: 1, title: "G?i l?i kh�ch VIP b�n 3", assignee: "Tu?n Tiger", assigner: "L� Minh (Boss)", status: "todo", priority: "high", deadline: "22:00" },
-            { id: 2, title: "Ki?m k� kho ru?u m?nh", assignee: "H�ng Bar", assigner: "Ph?m H�ng (QL)", status: "doing", priority: "medium", deadline: "20:00" },
-            { id: 3, title: "Setup b�n ti?c sinh nh?t", assignee: "My Sales", assigner: "Ph?m H�ng (QL)", status: "done", priority: "high", deadline: "19:00" },
+            { id: 1, title: "Gọi lại khách VIP bàn 3", assignee: "Tuấn Tiger", assigner: "Lê Minh (Boss)", status: "todo", priority: "high", deadline: "22:00" },
+            { id: 2, title: "Kiểm kê kho rượu mạnh", assignee: "Hùng Bar", assigner: "Phạm Hùng (QL)", status: "doing", priority: "medium", deadline: "20:00" },
+            { id: 3, title: "Setup bàn tiệc sinh nhật", assignee: "My Sales", assigner: "Phạm Hùng (QL)", status: "done", priority: "high", deadline: "19:00" },
         ];
 
         const INITIAL_EXPENSES = [
-            { id: 1, type: "Nh?p h�ng", desc: "Nh?p ru?u kho t?ng", amount: 25000000, status: "pending", date: "2023-10-25" },
-            { id: 2, type: "Marketing", desc: "Ch?y Ads Facebook", amount: 5000000, status: "approved", date: "2023-10-25" },
+            { id: 1, type: "Nhập hàng", desc: "Nhập rượu kho tổng", amount: 25000000, status: "pending", date: "2023-10-25" },
+            { id: 2, type: "Marketing", desc: "Chạy Ads Facebook", amount: 5000000, status: "approved", date: "2023-10-25" },
         ];
 
         // --- UTILS ---
@@ -110,7 +110,7 @@
             expense: 40000000 + Math.random() * 20000000 * seed,
             bookings: Math.floor(10 + Math.random() * 10 * seed),
             chartData: Array.from({ length: 7 }, (_, i) => ({
-                name: `Ng�y ${i + 1}`,
+                name: `Ngày ${i + 1}`,
                 value: Math.floor(Math.random() * 100) + 20
             }))
         });
@@ -131,7 +131,7 @@
                     </select>
                 </div>
                 <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded border border-slate-700">
-                    <span className="text-xs text-slate-400">Th�ng</span>
+                    <span className="text-xs text-slate-400">Tháng</span>
                     <select 
                         value={value.month} 
                         onChange={(e) => onChange({...value, month: Number(e.target.value)})}
@@ -147,7 +147,7 @@
                             onClick={() => onChange({...value, period: p})}
                             className={`px-3 py-1 rounded text-xs font-medium transition-colors ${value.period === p ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
                         >
-                            {p === 'today' ? 'H�m nay' : p === 'week' ? 'Tu?n n�y' : 'Th�ng n�y'}
+                            {p === 'today' ? 'Hôm nay' : p === 'week' ? 'Tuần này' : 'Tháng này'}
                         </button>
                     ))}
                 </div>
@@ -206,18 +206,18 @@
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="bg-slate-800 p-6 rounded-xl border border-slate-600 w-full max-w-md shadow-2xl">
                         <h3 className="text-xl font-bold text-white mb-4 flex justify-between items-center">
-                            Giao Nhi?m V? M?i
+                            Giao Nhiệm Vụ Mới
                             <button onClick={onClose}><Icons.X size={20} className="text-slate-400" /></button>
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-xs text-slate-400 mb-1 block">T�n c�ng vi?c</label>
-                                <input className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" placeholder="V� d?: G?i l?i kh�ch b�n 5" value={title} onChange={e => setTitle(e.target.value)} />
+                                <label className="text-xs text-slate-400 mb-1 block">Tên công việc</label>
+                                <input className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" placeholder="Ví dụ: Gọi lại khách bàn 5" value={title} onChange={e => setTitle(e.target.value)} />
                             </div>
                             <div>
-                                <label className="text-xs text-slate-400 mb-1 block">Ngu?i th?c hi?n</label>
+                                <label className="text-xs text-slate-400 mb-1 block">Người thực hiện</label>
                                 <select className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" value={assignee} onChange={e => setAssignee(e.target.value)}>
-                                    <option value="">-- Ch?n nh�n s? --</option>
+                                    <option value="">-- Chọn nhân sự --</option>
                                     {staffList.map((s) => <option key={s.id} value={s.name}>{s.name} ({s.role})</option>)}
                                 </select>
                             </div>
@@ -227,17 +227,17 @@
                                     <input type="time" className="bg-slate-900 border border-slate-700 rounded p-3 text-white" value={deadline} onChange={e => setDeadline(e.target.value)} />
                                 </div>
                                 <div>
-                                    <label className="text-xs text-slate-400 mb-1 block">Uu ti�n</label>
+                                    <label className="text-xs text-slate-400 mb-1 block">Ưu tiên</label>
                                     <select className="bg-slate-900 border border-slate-700 rounded p-3 text-white w-full" value={priority} onChange={e => setPriority(e.target.value)}>
                                         <option value="high">Cao</option>
-                                        <option value="medium">B�nh thu?ng</option>
-                                        <option value="low">Th?p</option>
+                                        <option value="medium">Bình thường</option>
+                                        <option value="low">Thấp</option>
                                     </select>
                                 </div>
                             </div>
                             <button 
                                 onClick={() => { 
-                                    if(!title || !assignee) return alert("Vui l�ng nh?p d? th�ng tin");
+                                    if(!title || !assignee) return alert("Vui lòng nhập đủ thông tin");
                                     onSave({title, assignee, deadline, priority}); 
                                     onClose(); 
                                     setTitle(""); 
@@ -245,7 +245,7 @@
                                 }} 
                                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg mt-4 shadow-lg shadow-indigo-900/50"
                             >
-                                Giao Vi?c Ngay
+                                Giao Việc Ngay
                             </button>
                         </div>
                     </div>
@@ -257,7 +257,7 @@
         const AddExpenseModal = ({ isOpen, onClose, onSave }) => {
             const [desc, setDesc] = useState("");
             const [amount, setAmount] = useState("");
-            const [type, setType] = useState("Nh?p h�ng");
+            const [type, setType] = useState("Nhập hàng");
 
             if(!isOpen) return null;
 
@@ -265,31 +265,31 @@
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="bg-slate-800 p-6 rounded-xl border border-slate-600 w-full max-w-md shadow-2xl">
                         <h3 className="text-xl font-bold text-white mb-4 flex justify-between items-center">
-                            T?o Phi?u Chi M?i
+                            Tạo Phiếu Chi Mới
                             <button onClick={onClose}><Icons.X size={20} className="text-slate-400" /></button>
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-xs text-slate-400 mb-1 block">N?i dung chi</label>
-                                <input className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" placeholder="V� d?: Nh?p ru?u Chivas" value={desc} onChange={e => setDesc(e.target.value)} />
+                                <label className="text-xs text-slate-400 mb-1 block">Nội dung chi</label>
+                                <input className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" placeholder="Ví dụ: Nhập rượu Chivas" value={desc} onChange={e => setDesc(e.target.value)} />
                             </div>
                             <div>
-                                <label className="text-xs text-slate-400 mb-1 block">S? ti?n (VN�)</label>
+                                <label className="text-xs text-slate-400 mb-1 block">Số tiền (VNĐ)</label>
                                 <input className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" type="number" placeholder="0" value={amount} onChange={e => setAmount(e.target.value)} />
                             </div>
                             <div>
-                                <label className="text-xs text-slate-400 mb-1 block">Lo?i chi ph�</label>
+                                <label className="text-xs text-slate-400 mb-1 block">Loại chi phí</label>
                                 <select className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white" value={type} onChange={e => setType(e.target.value)}>
-                                    <option value="Nh?p h�ng">Nh?p h�ng / Kho</option>
+                                    <option value="Nhập hàng">Nhập hàng / Kho</option>
                                     <option value="Marketing">Marketing / QC</option>
-                                    <option value="V?n h�nh">V?n h�nh / �i?n nu?c</option>
-                                    <option value="Nh�n s?">Luong / Thu?ng</option>
-                                    <option value="Kh�c">Kh�c</option>
+                                    <option value="Vận hành">Vận hành / Điện nước</option>
+                                    <option value="Nhân sự">Lương / Thưởng</option>
+                                    <option value="Khác">Khác</option>
                                 </select>
                             </div>
                             <button 
                                 onClick={() => { 
-                                    if(!desc || !amount) return alert("Vui l�ng nh?p d? th�ng tin");
+                                    if(!desc || !amount) return alert("Vui lòng nhập đủ thông tin");
                                     onSave({desc, amount: Number(amount), type}); 
                                     onClose(); 
                                     setDesc(""); 
@@ -297,7 +297,7 @@
                                 }}
                                 className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-lg mt-2 shadow-lg shadow-rose-900/50"
                             >
-                                Luu Phi?u Chi
+                                Lưu Phiếu Chi
                             </button>
                         </div>
                     </div>
@@ -335,16 +335,16 @@
                                     value={selectedTableId}
                                     onChange={(e) => setSelectedTableId(e.target.value)}
                                 >
-                                    <option value="">-- Ch?n B�n --</option>
+                                    <option value="">-- Chọn Bàn --</option>
                                     {tablesAvailable.filter((t) => t.status === 'empty').map((t) => (
-                                        <option key={t.id} value={t.id}>{t.name} (Tr?ng)</option>
+                                        <option key={t.id} value={t.id}>{t.name} (Trống)</option>
                                     ))}
                                     {tablesAvailable.filter((t) => t.status === 'occupied').map((t) => (
-                                        <option key={t.id} value={t.id} disabled>{t.name} (C� kh�ch)</option>
+                                        <option key={t.id} value={t.id} disabled>{t.name} (Có khách)</option>
                                     ))}
                                 </select>
-                                <input type="text" placeholder="T�n kh�ch" className="bg-slate-800 border border-slate-600 rounded p-2 text-white" value={customerName} onChange={e => setCustomerName(e.target.value)} />
-                                <input type="text" placeholder="S�T" className="bg-slate-800 border border-slate-600 rounded p-2 text-white" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
+                                <input type="text" placeholder="Tên khách" className="bg-slate-800 border border-slate-600 rounded p-2 text-white" value={customerName} onChange={e => setCustomerName(e.target.value)} />
+                                <input type="text" placeholder="SĐT" className="bg-slate-800 border border-slate-600 rounded p-2 text-white" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 bg-slate-900">
                                 <div className="grid grid-cols-3 gap-3">
@@ -358,7 +358,7 @@
                             </div>
                         </div>
                         <div className="w-1/3 flex flex-col bg-slate-950">
-                            <div className="p-4 border-b border-slate-800 flex justify-between"><h3 className="font-bold text-white">Gi? h�ng</h3><span className="text-slate-400 text-sm">{cart.length} m�n</span></div>
+                            <div className="p-4 border-b border-slate-800 flex justify-between"><h3 className="font-bold text-white">Giỏ hàng</h3><span className="text-slate-400 text-sm">{cart.length} món</span></div>
                             <div className="flex-1 overflow-y-auto p-4 space-y-3">
                                 {cart.map((item, idx) => (
                                     <div key={idx} className="flex justify-between text-sm border-b border-slate-800 pb-2">
@@ -368,14 +368,14 @@
                                 ))}
                             </div>
                             <div className="p-6 bg-slate-900 border-t border-slate-800">
-                                <div className="flex justify-between text-xl font-black text-white mb-6"><span>T?NG</span><span className="text-emerald-400">{formatCurrency(total)}</span></div>
+                                <div className="flex justify-between text-xl font-black text-white mb-6"><span>TỔNG</span><span className="text-emerald-400">{formatCurrency(total)}</span></div>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <button onClick={onClose} className="bg-slate-700 text-white py-3 rounded-lg font-bold">H?y</button>
+                                    <button onClick={onClose} className="bg-slate-700 text-white py-3 rounded-lg font-bold">Hủy</button>
                                     <button onClick={() => { 
-                                        if(!selectedTableId) return alert("Chua ch?n b�n!");
+                                        if(!selectedTableId) return alert("Chưa chọn bàn!");
                                         onSave({ tableId: Number(selectedTableId), total, customerName, customerPhone }); 
                                         onClose(); 
-                                    }} className="bg-indigo-600 text-white py-3 rounded-lg font-bold shadow-lg">L�N �ON</button>
+                                    }} className="bg-indigo-600 text-white py-3 rounded-lg font-bold shadow-lg">LÊN ĐƠN</button>
                                 </div>
                             </div>
                         </div>
@@ -435,21 +435,21 @@
             };
 
             const navItems = [
-                { id: "dashboard", label: "T?ng Quan", icon: Icons.LayoutDashboard, roles: ["owner", "manager"] },
-                { id: "cashin", label: "Ti?n V�o (POS)", icon: Icons.TrendingUp, roles: ["owner", "manager", "staff"] },
-                { id: "cashout", label: "Ti?n Ra", icon: Icons.TrendingDown, roles: ["owner", "manager"] },
-                { id: "staff", label: "Nh�n s?", icon: Icons.Users, roles: ["owner", "manager"] },
-                { id: "tasks", label: "Nhi?m v?", icon: Icons.CheckSquare, roles: ["owner", "manager", "staff"] },
+                { id: "dashboard", label: "Tổng Quan", icon: Icons.LayoutDashboard, roles: ["owner", "manager"] },
+                { id: "cashin", label: "Tiền Vào (POS)", icon: Icons.TrendingUp, roles: ["owner", "manager", "staff"] },
+                { id: "cashout", label: "Tiền Ra", icon: Icons.TrendingDown, roles: ["owner", "manager"] },
+                { id: "staff", label: "Nhân sự", icon: Icons.Users, roles: ["owner", "manager"] },
+                { id: "tasks", label: "Nhiệm vụ", icon: Icons.CheckSquare, roles: ["owner", "manager", "staff"] },
             ];
 
             const renderDashboard = () => (
                 <div className="space-y-6 animate-fade-in">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-black text-white uppercase">T?ng Quan</h2>
+                        <h2 className="text-2xl font-black text-white uppercase">Tổng Quan</h2>
                         <DateFilter value={dateFilter} onChange={setDateFilter} />
                     </div>
                     
-                    {/* 3 C?t Tr�n */}
+                    {/* 3 Cột Trên */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <StatCard 
                             title="Doanh Thu" 
@@ -460,7 +460,7 @@
                             onClick={() => setCurrentView('cashin')}
                         />
                         <StatCard 
-                            title="Chi Ph�" 
+                            title="Chi Phí" 
                             value={formatCurrency(simulatedData.expense)} 
                             type="danger" 
                             chartColor="#f43f5e"
@@ -468,7 +468,7 @@
                             onClick={() => setCurrentView('cashout')}
                         />
                         <StatCard 
-                            title="L?i Nhu?n R�ng" 
+                            title="Lợi Nhuận Ròng" 
                             value={formatCurrency(simulatedData.revenue - simulatedData.expense)} 
                             type="success" 
                             chartColor="#f59e0b"
@@ -476,19 +476,19 @@
                         />
                     </div>
 
-                    {/* 2 C?t Du?i */}
+                    {/* 2 Cột Dưới */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <StatCard 
-                            title="Booking Hi?u Qu?" 
-                            value={`${simulatedData.bookings} B�n`} 
-                            subtext="L?p d?y: 65%"
+                            title="Booking Hiệu Quả" 
+                            value={`${simulatedData.bookings} Bàn`} 
+                            subtext="Lấp đầy: 65%"
                             type="neutral" 
                             chartColor="#6366f1"
                             chartData={simulatedData.chartData}
                             onClick={() => setCurrentView('cashin')}
                         />
                         <StatCard 
-                            title="Hi?u Su?t Nh�n S?" 
+                            title="Hiệu Suất Nhân Sự" 
                             value="94%" 
                             subtext="Top Star: Lan VIP"
                             type="neutral" 
@@ -508,19 +508,19 @@
                         onClick={() => setIsExpenseModalOpen(true)}
                         className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2 rounded-lg flex items-center font-bold shadow-lg shadow-rose-900/50"
                       >
-                        <Icons.Plus className="mr-2" size={18} /> T?o Phi?u Chi
+                        <Icons.Plus className="mr-2" size={18} /> Tạo Phiếu Chi
                       </button>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       {/* Chart Breakdown */}
                       <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                        <h3 className="text-lg font-bold text-white mb-4">Co C?u Chi Ph�</h3>
+                        <h3 className="text-lg font-bold text-white mb-4">Cơ Cấu Chi Phí</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
                               <PieChart>
                                   <Pie data={[
-                                    { name: 'Nh?p h�ng', value: 50 }, { name: 'Nh�n s?', value: 30 }, { name: 'Mkt', value: 15 }, { name: 'Kh�c', value: 5 }
+                                    { name: 'Nhập hàng', value: 50 }, { name: 'Nhân sự', value: 30 }, { name: 'Mkt', value: 15 }, { name: 'Khác', value: 5 }
                                   ]} dataKey="value" cx="50%" cy="50%" innerRadius={60} outerRadius={80}>
                                     {COLORS.map((color, index) => <Cell key={`cell-${index}`} fill={color} />)}
                                   </Pie>
@@ -529,8 +529,8 @@
                             </ResponsiveContainer>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-sm mt-4">
-                            <div className="flex items-center"><div className="w-3 h-3 bg-emerald-500 rounded-full mr-2"></div> Nh?p h�ng (50%)</div>
-                            <div className="flex items-center"><div className="w-3 h-3 bg-amber-500 rounded-full mr-2"></div> Nh�n s? (30%)</div>
+                            <div className="flex items-center"><div className="w-3 h-3 bg-emerald-500 rounded-full mr-2"></div> Nhập hàng (50%)</div>
+                            <div className="flex items-center"><div className="w-3 h-3 bg-amber-500 rounded-full mr-2"></div> Nhân sự (30%)</div>
                             <div className="flex items-center"><div className="w-3 h-3 bg-rose-500 rounded-full mr-2"></div> Marketing (15%)</div>
                         </div>
                       </div>
@@ -538,18 +538,18 @@
                       {/* Expense List */}
                       <div className="lg:col-span-2 bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
                         <div className="p-4 border-b border-slate-700 bg-slate-950/50 flex justify-between items-center">
-                            <h3 className="font-bold text-white">Danh S�ch Phi?u Chi</h3>
-                            <span className="text-slate-400 text-sm">T?ng: <span className="text-rose-400 font-bold">{formatCurrency(expenseData.reduce((a,b) => a + b.amount, 0))}</span></span>
+                            <h3 className="font-bold text-white">Danh Sách Phiếu Chi</h3>
+                            <span className="text-slate-400 text-sm">Tổng: <span className="text-rose-400 font-bold">{formatCurrency(expenseData.reduce((a,b) => a + b.amount, 0))}</span></span>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left text-slate-300">
                               <thead className="bg-slate-900 text-slate-400 uppercase text-xs">
                                   <tr>
-                                    <th className="px-6 py-4">Th?i gian</th>
-                                    <th className="px-6 py-4">H?ng m?c</th>
-                                    <th className="px-6 py-4">N?i dung</th>
-                                    <th className="px-6 py-4 text-right">S? ti?n</th>
-                                    <th className="px-6 py-4 text-center">Tr?ng th�i</th>
+                                    <th className="px-6 py-4">Thời gian</th>
+                                    <th className="px-6 py-4">Hạng mục</th>
+                                    <th className="px-6 py-4">Nội dung</th>
+                                    <th className="px-6 py-4 text-right">Số tiền</th>
+                                    <th className="px-6 py-4 text-center">Trạng thái</th>
                                   </tr>
                               </thead>
                               <tbody>
@@ -561,7 +561,7 @@
                                         <td className="px-6 py-4 text-right font-bold text-rose-400">{formatCurrency(exp.amount)}</td>
                                         <td className="px-6 py-4 text-center">
                                           <span className={`px-2 py-1 rounded text-xs font-bold ${exp.status === 'approved' ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-900' : 'bg-amber-900/30 text-amber-400 border border-amber-900'}`}>
-                                              {exp.status === 'approved' ? '�� duy?t' : 'Ch? duy?t'}
+                                              {exp.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
                                           </span>
                                         </td>
                                     </tr>
@@ -577,13 +577,13 @@
             const renderTasks = () => (
                 <div className="h-full flex flex-col animate-fade-in">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-black text-white uppercase">Nhi?m V? & KPI</h2>
+                        <h2 className="text-2xl font-black text-white uppercase">Nhiệm Vụ & KPI</h2>
                         {(role === 'owner' || role === 'manager') && (
                             <button 
                                 onClick={() => setIsTaskModalOpen(true)}
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center font-bold shadow-lg"
                             >
-                                <Icons.Plus size={18} className="mr-2" /> Giao Vi?c M?i
+                                <Icons.Plus size={18} className="mr-2" /> Giao Việc Mới
                             </button>
                         )}
                     </div>
@@ -592,7 +592,7 @@
                         {['todo', 'doing', 'done'].map(status => (
                             <div key={status} className="bg-slate-800/50 rounded-xl border border-slate-700 flex flex-col h-full">
                                 <div className={`p-4 border-b border-slate-700 font-bold uppercase tracking-wider flex justify-between ${status === 'todo' ? 'text-slate-300' : status === 'doing' ? 'text-amber-400' : 'text-emerald-400'}`}>
-                                    <span>{status === 'todo' ? 'M?i Giao' : status === 'doing' ? '�ang L�m' : 'Ho�n Th�nh'}</span>
+                                    <span>{status === 'todo' ? 'Mới Giao' : status === 'doing' ? 'Đang Làm' : 'Hoàn Thành'}</span>
                                     <span className="bg-slate-900 px-2 rounded text-xs py-0.5">{taskData.filter(t => t.status === status).length}</span>
                                 </div>
                                 <div className="p-3 space-y-3 overflow-y-auto flex-1">
@@ -603,18 +603,18 @@
                                                 <div className="text-xs text-slate-500">DL: {task.deadline}</div>
                                             </div>
                                             <h4 className="font-bold text-white mb-1">{task.title}</h4>
-                                            <div className="text-xs text-slate-400 mb-3">Giao: {task.assigner} ? <span className="text-white font-bold">{task.assignee}</span></div>
+                                            <div className="text-xs text-slate-400 mb-3">Giao: {task.assigner} → <span className="text-white font-bold">{task.assignee}</span></div>
                                             <div className="grid grid-cols-1 gap-2">
                                                 {status === 'todo' && (role === 'staff' || role === 'manager') && (
-                                                    <button onClick={() => handleTaskAction(task.id, 'accept')} className="bg-slate-700 hover:bg-indigo-600 text-white text-xs py-2 rounded font-bold">NH?N VI?C</button>
+                                                    <button onClick={() => handleTaskAction(task.id, 'accept')} className="bg-slate-700 hover:bg-indigo-600 text-white text-xs py-2 rounded font-bold">NHẬN VIỆC</button>
                                                 )}
                                                 {status === 'doing' && (role === 'staff' || role === 'manager') && (
-                                                    <button onClick={() => handleTaskAction(task.id, 'complete')} className="bg-emerald-700 hover:bg-emerald-600 text-white text-xs py-2 rounded font-bold">HO�N TH�NH</button>
+                                                    <button onClick={() => handleTaskAction(task.id, 'complete')} className="bg-emerald-700 hover:bg-emerald-600 text-white text-xs py-2 rounded font-bold">HOÀN THÀNH</button>
                                                 )}
                                             </div>
                                         </div>
                                     ))}
-                                    {taskData.filter(t => t.status === status).length === 0 && <div className="text-center text-slate-600 italic py-10">Tr?ng</div>}
+                                    {taskData.filter(t => t.status === status).length === 0 && <div className="text-center text-slate-600 italic py-10">Trống</div>}
                                 </div>
                             </div>
                         ))}
@@ -649,7 +649,7 @@
                             <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="md:hidden text-slate-300"><Icons.Menu /></button>
                             <div className="flex-1"></div>
                             <div className="flex items-center space-x-4">
-                                <div className="text-right hidden sm:block"><div className="text-sm font-bold text-white">{role === 'owner' ? 'L� Minh' : role === 'manager' ? 'Ph?m H�ng' : 'Tu?n Tiger'}</div><div className="text-xs text-indigo-400 font-bold uppercase">{role}</div></div>
+                                <div className="text-right hidden sm:block"><div className="text-sm font-bold text-white">{role === 'owner' ? 'Lê Minh' : role === 'manager' ? 'Phạm Hùng' : 'Tuấn Tiger'}</div><div className="text-xs text-indigo-400 font-bold uppercase">{role}</div></div>
                                 <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold border-2 border-slate-700">{role === 'owner' ? 'LM' : role === 'manager' ? 'PH' : 'TT'}</div>
                             </div>
                         </header>
@@ -658,12 +658,12 @@
                             {currentView === 'dashboard' && renderDashboard()}
                             {currentView === 'cashin' && (
                                 <div className="space-y-6 animate-fade-in">
-                                    <div className="flex justify-between items-center"><DateFilter value={dateFilter} onChange={setDateFilter} /><button onClick={() => setIsPOSOpen(true)} className="bg-emerald-600 text-white px-4 py-2 rounded font-bold flex items-center"><Icons.Plus className="mr-2" /> T?o �on</button></div>
+                                    <div className="flex justify-between items-center"><DateFilter value={dateFilter} onChange={setDateFilter} /><button onClick={() => setIsPOSOpen(true)} className="bg-emerald-600 text-white px-4 py-2 rounded font-bold flex items-center"><Icons.Plus className="mr-2" /> Tạo Đơn</button></div>
                                     <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
                                         {tables.map(t => (
                                             <div key={t.id} onClick={() => t.status === 'empty' && setIsPOSOpen(true)} className={`aspect-square rounded-xl flex flex-col items-center justify-center border-2 cursor-pointer ${t.status === 'occupied' ? 'bg-rose-900/40 border-rose-500' : 'bg-emerald-900/20 border-emerald-500/30'}`}>
                                                 <span className="font-bold text-lg">{t.id}</span>
-                                                <div className="text-[10px] mt-1 text-center">{t.status === 'occupied' ? <><div className="truncate px-1">{t.customerName}</div><div>{formatCurrency(t.total)}</div></> : <span className="opacity-50">Tr?ng</span>}</div>
+                                                <div className="text-[10px] mt-1 text-center">{t.status === 'occupied' ? <><div className="truncate px-1">{t.customerName}</div><div>{formatCurrency(t.total)}</div></> : <span className="opacity-50">Trống</span>}</div>
                                             </div>
                                         ))}
                                     </div>
