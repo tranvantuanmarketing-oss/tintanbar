@@ -65,10 +65,11 @@
             ShoppingBag: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
             Clock: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
             UserPlus: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>,
-            X: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            X: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
+            LogOut: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
         };
 
-        // --- DỮ LIỆU MẪU (MOCK DATA) ---
+        // --- MOCK DATA ---
         const INITIAL_STAFF = [
             { id: 1, name: "Tuấn Tiger", role: "Sales", shift: "Ca 1 (18h-22h)", revenue: 45000000, bookings: 5, tasks: 90, kpi: 90, avatar: "T" },
             { id: 2, name: "Lan VIP", role: "Sales", shift: "Ca 2 (22h-02h)", revenue: 82000000, bookings: 12, tasks: 100, kpi: 110, avatar: "L" },
@@ -170,7 +171,6 @@
                 }
             };
             
-            // Xử lý ID cho gradient để tránh lỗi cú pháp SVG khi tiêu đề có khoảng trắng
             const gradientId = "color" + title.replace(/\s+/g, '');
 
             return (
@@ -391,11 +391,68 @@
             );
         };
 
+        // --- LOGIN SCREEN (NO PASSWORD) ---
+        const LoginScreen = ({ onLogin }) => (
+            <div className="flex items-center justify-center h-screen bg-slate-950">
+                <div className="w-full max-w-2xl p-8 animate-fade-in">
+                    <div className="text-center mb-12">
+                        <h1 className="text-5xl font-black bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent uppercase tracking-tighter mb-4">
+                            Titan Dashboard
+                        </h1>
+                        <p className="text-slate-400">Hệ thống quản trị Club - Vui lòng chọn tài khoản</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* BOSS */}
+                        <button 
+                            onClick={() => onLogin('owner')}
+                            className="bg-slate-900 border border-slate-800 hover:border-amber-500 hover:bg-slate-800 p-6 rounded-2xl transition-all group flex flex-col items-center"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-white font-bold text-2xl mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                                LM
+                            </div>
+                            <h3 className="font-bold text-white text-lg">Lê Minh</h3>
+                            <span className="text-xs text-amber-500 font-bold uppercase mt-1">BOSS / ADMIN</span>
+                        </button>
+
+                        {/* MANAGER */}
+                        <button 
+                            onClick={() => onLogin('manager')}
+                            className="bg-slate-900 border border-slate-800 hover:border-blue-500 hover:bg-slate-800 p-6 rounded-2xl transition-all group flex flex-col items-center"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-2xl mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                                PH
+                            </div>
+                            <h3 className="font-bold text-white text-lg">Phạm Hùng</h3>
+                            <span className="text-xs text-blue-500 font-bold uppercase mt-1">MANAGER</span>
+                        </button>
+
+                        {/* STAFF */}
+                        <button 
+                            onClick={() => onLogin('staff')}
+                            className="bg-slate-900 border border-slate-800 hover:border-emerald-500 hover:bg-slate-800 p-6 rounded-2xl transition-all group flex flex-col items-center"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white font-bold text-2xl mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                                TT
+                            </div>
+                            <h3 className="font-bold text-white text-lg">Tuấn Tiger</h3>
+                            <span className="text-xs text-emerald-500 font-bold uppercase mt-1">SALES STAFF</span>
+                        </button>
+                    </div>
+                    
+                    <div className="mt-12 text-center text-xs text-slate-600">
+                        * Demo Version: Không yêu cầu mật khẩu đăng nhập
+                    </div>
+                </div>
+            </div>
+        );
+
         // --- MAIN APP ---
         function TitanApp() {
             const [currentView, setCurrentView] = useState("dashboard");
             const [role, setRole] = useState("owner"); 
             const [isSidebarOpen, setSidebarOpen] = useState(true);
+            const [isLoggedIn, setIsLoggedIn] = useState(false); // State quản lý đăng nhập
             
             // Data State
             const [dateFilter, setDateFilter] = useState({ year: 2023, month: 10, period: 'today' });
@@ -415,6 +472,17 @@
                 setSimulatedData(generateRandomData(seed));
                 setStaffData(staffData.map(s => ({ ...s, revenue: s.revenue * (0.8 + Math.random() * 0.4) })));
             }, [dateFilter]);
+
+            // Handlers
+            const handleLogin = (selectedRole) => {
+                setRole(selectedRole);
+                setIsLoggedIn(true);
+            };
+
+            const handleLogout = () => {
+                setIsLoggedIn(false);
+                setCurrentView("dashboard");
+            };
 
             const handleCreateOrder = (orderInfo) => {
                 setTables(tables.map(t => t.id === orderInfo.tableId ? { 
@@ -629,6 +697,11 @@
                 </div>
             );
 
+            // LOGIC CHECK LOGIN
+            if (!isLoggedIn) {
+                return <LoginScreen onLogin={handleLogin} />;
+            }
+
             return (
                 <div className="flex h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden">
                     <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} hidden md:flex flex-col bg-slate-950 border-r border-slate-800 transition-all duration-300 z-20`}>
@@ -643,11 +716,13 @@
                             ))}
                         </nav>
                         <div className="p-4 border-t border-slate-800">
-                            <div className={`flex flex-col gap-2 ${!isSidebarOpen && 'items-center'}`}>
-                                <button onClick={() => setRole('owner')} className={`text-xs px-3 py-2 rounded font-bold border ${role === 'owner' ? 'bg-amber-500 text-black' : 'border-slate-700 text-slate-400'}`}>BOSS</button>
-                                <button onClick={() => setRole('manager')} className={`text-xs px-3 py-2 rounded font-bold border ${role === 'manager' ? 'bg-blue-500 text-white' : 'border-slate-700 text-slate-400'}`}>MANAGER</button>
-                                <button onClick={() => setRole('staff')} className={`text-xs px-3 py-2 rounded font-bold border ${role === 'staff' ? 'bg-emerald-500 text-white' : 'border-slate-700 text-slate-400'}`}>STAFF</button>
-                            </div>
+                            <button 
+                                onClick={handleLogout}
+                                className={`w-full flex items-center justify-center gap-2 text-xs px-3 py-3 rounded-lg font-bold border border-rose-900 text-rose-500 hover:bg-rose-900/20 transition-colors ${!isSidebarOpen && 'justify-center'}`}
+                            >
+                                <Icons.LogOut size={16} />
+                                {isSidebarOpen && "Đăng Xuất"}
+                            </button>
                         </div>
                     </aside>
 
