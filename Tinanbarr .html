@@ -3,28 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Titan Dashboard V3 - Fixed</title>
+    <title>Titan Dashboard - Quản Trị Club</title>
     
-    <!-- 1. Cập nhật các thư viện lõi (Core Libraries) -->
+    <!-- 1. Thư viện React & ReactDOM (Core) -->
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- 2. Babel để xử lý JSX ngay trên trình duyệt -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 3. Tailwind CSS cho giao diện -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 2. QUAN TRỌNG: Thêm Prop-Types (Bắt buộc cho Recharts chạy UMD) -->
+    <!-- 4. Prop-Types (Bắt buộc cho Recharts bản UMD) -->
     <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
 
-    <!-- 3. Thư viện Recharts -->
+    <!-- 5. Thư viện Biểu đồ Recharts -->
     <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+        
+        /* Custom Scrollbar cho nền tối */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Hiệu ứng Fade In */
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 h-screen overflow-hidden">
@@ -33,10 +41,9 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
         
-        // Kiểm tra xem Recharts có tải thành công không
+        // Kiểm tra Recharts để tránh lỗi màn hình trắng
         if (!window.Recharts) {
-            document.getElementById('root').innerHTML = '<div style="color:white; padding: 20px;">Lỗi: Không tải được thư viện Recharts. Vui lòng kiểm tra kết nối mạng hoặc thử lại.</div>';
-            throw new Error("Recharts not loaded");
+            document.getElementById('root').innerHTML = '<div style="color:white; padding: 20px;">Đang tải thư viện... Nếu quá lâu, vui lòng reload.</div>';
         }
 
         const { 
@@ -44,7 +51,7 @@
             LineChart, Line, PieChart, Pie, Cell, AreaChart, Area 
         } = window.Recharts;
 
-        // --- ICONS (SVG Components) ---
+        // --- ICONS (SVG) ---
         const Icons = {
             LayoutDashboard: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>,
             TrendingUp: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>,
@@ -61,7 +68,7 @@
             X: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         };
 
-        // --- MOCK DATA ---
+        // --- DỮ LIỆU MẪU (MOCK DATA) ---
         const INITIAL_STAFF = [
             { id: 1, name: "Tuấn Tiger", role: "Sales", shift: "Ca 1 (18h-22h)", revenue: 45000000, bookings: 5, tasks: 90, kpi: 90, avatar: "T" },
             { id: 2, name: "Lan VIP", role: "Sales", shift: "Ca 2 (22h-02h)", revenue: 82000000, bookings: 12, tasks: 100, kpi: 110, avatar: "L" },
@@ -163,6 +170,7 @@
                 }
             };
             
+            // Xử lý ID cho gradient để tránh lỗi cú pháp SVG khi tiêu đề có khoảng trắng
             const gradientId = "color" + title.replace(/\s+/g, '');
 
             return (
@@ -253,7 +261,6 @@
             );
         };
         
-        // --- ADD EXPENSE MODAL ---
         const AddExpenseModal = ({ isOpen, onClose, onSave }) => {
             const [desc, setDesc] = useState("");
             const [amount, setAmount] = useState("");
